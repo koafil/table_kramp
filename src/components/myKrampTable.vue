@@ -50,11 +50,20 @@
       <Column field="sale" header="Акция" sortable></Column>
       <Column field="site"  sortable>
         <template #header>
-          <TriStateCheckbox v-model="filters.site.checkbox" @update:model-value="value => { filters.site.value=(value===null?null:(value?1:0));}"/>
+          <TriStateCheckbox
+              v-model="filters.site.checkbox" @update:model-value="value => { filters.site.value=(value===null?null:(value?1:0));}"
+              class="mr-2"
+          />
+          На сайте
         </template>
         <template #body="dat">
 <!--          {{ (new Date(dat.data.site_date)).toDateString() }}-->
-          {{ Intl.DateTimeFormat().format(new Date(dat.data.site_date)) }}
+<!--          {{ Intl.DateTimeFormat().format(new Date(dat.data.site_date)) }}-->
+<!--          {{ moment.locale('en') }}-->
+<!--          {{ moment.locale() }}-->
+          <template v-if="dat.data.site == 1">Добавлено </template>
+          <template v-else>Удалено </template>
+          {{ moment(dat.data.site_date).fromNow() }}
 
         </template>
       </Column>
@@ -83,8 +92,11 @@ import { ref, onMounted, computed} from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-import ToggleButton from 'primevue/togglebutton';
+
 import TriStateCheckbox from 'primevue/tristatecheckbox'
+import moment from 'moment/dist/moment';
+import 'moment/dist/locale/ru';
+
 const totalRecords = ref(0)
 const rows = ref(10);
 
