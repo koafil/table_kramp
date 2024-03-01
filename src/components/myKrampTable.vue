@@ -17,6 +17,8 @@
                columnResizeMode="fit"
                showGridlines
                :rowClass="rowClass"
+               size="small"
+               scrollable
     >
       <template #header>
         <IconField iconPosition="left">
@@ -46,7 +48,16 @@
         </template>
       </Column>
       <Column field="sale" header="Акция" sortable></Column>
-      <Column field="site" header="На сайте" sortable></Column>
+      <Column field="site"  sortable>
+        <template #header>
+          <TriStateCheckbox v-model="filters.site.checkbox" @update:model-value="value => { filters.site.value=(value===null?null:(value?1:0));}"/>
+        </template>
+        <template #body="dat">
+<!--          {{ (new Date(dat.data.site_date)).toDateString() }}-->
+          {{ Intl.DateTimeFormat().format(new Date(dat.data.site_date)) }}
+
+        </template>
+      </Column>
 <!--      <Column field="brand" header="Бренд">-->
 <!--        <template #body="slotProps">-->
 <!--          {{ brands.get(slotProps.data.brand)?.Name }}-->
@@ -72,7 +83,8 @@ import { ref, onMounted, computed} from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-
+import ToggleButton from 'primevue/togglebutton';
+import TriStateCheckbox from 'primevue/tristatecheckbox'
 const totalRecords = ref(0)
 const rows = ref(10);
 
@@ -90,8 +102,8 @@ const filters = ref({
 /*  'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   representative: { value: null, matchMode: FilterMatchMode.IN },
   status: { value: null, matchMode: FilterMatchMode.EQUALS },
-  site: { value: null, matchMode: FilterMatchMode.EQUALS }
-*/
+*/  site: { checkbox: null, value: null, matchMode: FilterMatchMode.EQUALS }
+
 });
 
 
