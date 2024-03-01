@@ -3,19 +3,48 @@
     <!--    Keys: {{ findKeyArr }}-->
     <!--    {{ data1.rowData[1] }}-->
     <!--    {{ brands }}-->
-    <DataTable :value="products"
+    <DataTable v-model:filters="filters"
+               :value="products"
                :rows=rows
                tableStyle="min-width: 50rem"
                :totalRecords="totalRecords"
                :loading="loading"
                removableSort
+               filterDisplay="menu"
+               dataKey="id_kramp"
+               :globalFilterFields="['name', 'vendor_code']"
+               resizableColumns
+               columnResizeMode="fit"
+               showGridlines
+               :rowClass="rowClass"
     >
+      <template #header>
+        <IconField iconPosition="left">
+          <InputIcon class="pi pi-search"> </InputIcon>
+          <InputText v-model="filters['global'].value" placeholder="Поиск" />
+        </IconField>
+      </template>
       <Column field="id_kramp" header="ID" sortable></Column>
       <Column field="vendor_code" header="Артикул" sortable></Column>
-      <Column field="name" header="Название" sortable></Column>
-      <Column field="price" header="Цена" sortable></Column>
-      <Column field="price_base" header="Базовая цена" sortable></Column>
-      <Column field="tovar_count" header="Количество" sortable></Column>
+      <Column field="name" header="Название" sortable>
+        <template #filter="{ filterModel, filterCallback }">
+          <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
+        </template>
+      </Column>
+      <Column field="price" header="&#8381;" sortable></Column>
+      <Column field="price_base" header="&#8364;" sortable></Column>
+      <Column field="tovar_count" header="Количество" sortable>
+        <template #body="slotProps">
+          <div class="flex justify-content-between">
+          <div>
+            {{ slotProps.data.tovar_count }}
+          </div>
+          <div v-if="slotProps.data.tovar_count_old">
+            ({{ slotProps.data.tovar_count - slotProps.data.tovar_count_old }})
+          </div>
+          </div>
+        </template>
+      </Column>
       <Column field="sale" header="Акция" sortable></Column>
       <Column field="site" header="На сайте" sortable></Column>
 <!--      <Column field="brand" header="Бренд">-->
@@ -37,13 +66,34 @@
 <script setup>
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import InputText from 'primevue/inputtext'
 import { useFetch} from "@vueuse/core";
 import { ref, onMounted, computed} from 'vue';
+import { FilterMatchMode } from 'primevue/api';
+import InputIcon from 'primevue/inputicon';
+import IconField from 'primevue/iconfield';
 
 const totalRecords = ref(0)
 const rows = ref(10);
 
 const products = ref([]);
+
+const rowClass = (data) => {
+  return [{ 'bg-gray-400': data.site == 0 }];
+//  return [{ 'bg-red-100': data.site == 1 }];
+
+};
+
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+/*  'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  representative: { value: null, matchMode: FilterMatchMode.IN },
+  status: { value: null, matchMode: FilterMatchMode.EQUALS },
+  site: { value: null, matchMode: FilterMatchMode.EQUALS }
+*/
+});
+
 
 const url = computed(()=>{
   // return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${limit.value}&s=${findKey.value}`
@@ -55,7 +105,7 @@ const url = computed(()=>{
 //    keys=`&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`;
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}${keys}`
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`
-  return `http://192.168.50.50:3004/all`
+  return `http://192.168.50.5:3004/all`
 })
 const {isFetching:loading, error, data:data0 } = useFetch(url, {
   refetch: true,
