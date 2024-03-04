@@ -21,10 +21,18 @@
                scrollable
     >
       <template #header>
-        <IconField iconPosition="left">
-          <InputIcon class="pi pi-search"> </InputIcon>
-          <InputText v-model="filters['global'].value" placeholder="Поиск" />
-        </IconField>
+        <div class="flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <IconField iconPosition="left">
+            <InputIcon class="pi pi-search"> </InputIcon>
+            <InputText v-model="filters['global'].value" placeholder="Поиск" />
+          </IconField>
+        </div>
+        <div class="flex flex-column align-items-center">
+          <div class="card"> Получено: {{ moment(scans[0].date).fromNow() }} </div>
+          <div> {{ moment(scans[0].date).format('LLL') }} </div>
+        </div>
+        </div>
       </template>
       <Column field="id_kramp" header="ID" sortable></Column>
       <Column field="vendor_code" header="Артикул" sortable></Column>
@@ -57,14 +65,9 @@
           На сайте
         </template>
         <template #body="dat">
-<!--          {{ (new Date(dat.data.site_date)).toDateString() }}-->
-<!--          {{ Intl.DateTimeFormat().format(new Date(dat.data.site_date)) }}-->
-<!--          {{ moment.locale('en') }}-->
-<!--          {{ moment.locale() }}-->
           <template v-if="dat.data.site == 1">Добавлено </template>
           <template v-else>Удалено </template>
           {{ moment(dat.data.site_date).fromNow() }}
-
         </template>
       </Column>
 <!--      <Column field="brand" header="Бренд">-->
@@ -97,14 +100,16 @@ import TriStateCheckbox from 'primevue/tristatecheckbox'
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
 
+
 const totalRecords = ref(0)
 const rows = ref(10);
 
 const products = ref([]);
+const scans = ref([]);
 
 const rowClass = (data) => {
-  return [{ 'bg-gray-400': data.site == 0 }];
-//  return [{ 'bg-red-100': data.site == 1 }];
+//  return [{ 'bg-gray-400': data.site == 0 }];
+  return [{ 'text-400 bg-gray-100': data.site == 0 }];
 
 };
 
@@ -139,6 +144,13 @@ const {isFetching:loading, error, data:data0 } = useFetch(url, {
     return ctx
   }
 }).json();
+const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
+  afterFetch(ctx){
+    scans.value = ctx.data.rowData;
+    return ctx
+  }
+}).json();
+
 /*const {isFetching:loadingBrand, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3002/brands`, {
   afterFetch(ctx){
     brands_mass.value = ctx.data.rowData;
