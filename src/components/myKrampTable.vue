@@ -1,5 +1,7 @@
 <template>
-  <div class="card">
+  <span v-if="loading || loadingScans"> Загрузка...</span>
+  <span v-else-if="error|| error1"> Ошибка загрузки: {{ error }} </span>
+  <div v-else class="card">
     <!--    Keys: {{ findKeyArr }}-->
     <!--    {{ data1.rowData[1] }}-->
     <!--    {{ brands }}-->
@@ -41,7 +43,14 @@
           <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
         </template>
       </Column>
-      <Column field="price" header="&#8381;" sortable></Column>
+
+      <Column body-class="relative flex justify-content-center" field="price" header="&#8381;" sortable>
+        <template #body="dat">
+            <div class="z-1"> {{ dat.data.price }} </div>
+            <Tag class="z-0 w-2 h-1rem absolute top-0 right-0" v-if="dat.data.sale" icon="pi pi-info-circle" severity="info" value=""></Tag>
+        </template>
+      </Column>
+
       <Column field="price_base" header="&#8364;" sortable></Column>
       <Column field="tovar_count" header="Количество" sortable>
         <template #body="slotProps">
@@ -55,7 +64,6 @@
           </div>
         </template>
       </Column>
-      <Column field="sale" header="Акция" sortable></Column>
       <Column field="site"  sortable>
         <template #header>
           <TriStateCheckbox
@@ -95,8 +103,9 @@ import { ref, onMounted, computed} from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-
 import TriStateCheckbox from 'primevue/tristatecheckbox'
+import Tag from 'primevue/tag';
+
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
 
@@ -144,7 +153,16 @@ const {isFetching:loading, error, data:data0 } = useFetch(url, {
     return ctx
   }
 }).json();
-const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
+// const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
+//   afterFetch(ctx){
+//     scans.value = ctx.data.rowData;
+//     return ctx
+//   }
+// }).json();
+const getScans = ()=>{
+
+}
+const {isFetching:loadingScans, error:error1 } =  useFetch(`http://192.168.50.5:3004/scans`, {
   afterFetch(ctx){
     scans.value = ctx.data.rowData;
     return ctx
