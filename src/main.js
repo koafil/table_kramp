@@ -6,10 +6,16 @@ import "primeicons/primeicons.css";
 
 //import './style.css'
 
-
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config';
 
 import App from './App.vue'
 
-createApp(App).use(PrimeVue).mount('#app')
+const app = createApp(App);
+
+import Tooltip from 'primevue/tooltip';
+
+app.directive('tooltip', Tooltip);
+
+
+app.use(PrimeVue).mount('#app')

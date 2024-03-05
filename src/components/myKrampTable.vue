@@ -47,7 +47,15 @@
       <Column body-class="relative flex justify-content-center" field="price" header="&#8381;" sortable>
         <template #body="dat">
             <div class="z-1"> {{ dat.data.price }} </div>
-            <Tag class="z-0 w-2 h-1rem absolute top-0 right-0" v-if="dat.data.sale" icon="pi pi-info-circle" severity="info" value=""></Tag>
+            <Tag class="z-0 w-2 h-1rem absolute top-0 right-0"
+                 v-if="dat.data.sale"
+                 icon="pi pi-info-circle"
+                 severity="info"
+                 value=""
+                 v-tooltip="{ value: 'Акция', showDelay: 500 }"
+            >
+
+            </Tag>
         </template>
       </Column>
 
