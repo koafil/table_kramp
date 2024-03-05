@@ -7,7 +7,6 @@
     <!--    {{ brands }}-->
     <DataTable v-model:filters="filters"
                :value="products"
-               :rows=rows
                tableStyle="min-width: 50rem"
                :totalRecords="totalRecords"
                :loading="loading"
@@ -21,20 +20,32 @@
                :rowClass="rowClass"
                size="small"
                scrollable
+               @filter = "filter"
     >
       <template #header>
-        <div class="flex justify-content-between align-items-center flex-wrap">
-        <div>
-          <IconField iconPosition="left">
-            <InputIcon class="pi pi-search"> </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Поиск" />
-          </IconField>
+        <div class="flex justify-content-between align-items-center flex-wrap" >
+          <div>
+            <IconField iconPosition="left">
+              <InputIcon class="pi pi-search"> </InputIcon>
+              <InputText v-model="filters['global'].value" placeholder="Поиск" />
+            </IconField>
+          </div>
+          <div class="flex flex-column align-items-center" @click="toggleScans">
+            <div class="card"> Получено: {{ moment(scans[0].date).fromNow() }} </div>
+            <div> {{ moment(scans[0].date).format('LLL') }} </div>
+          </div>
         </div>
-        <div class="flex flex-column align-items-center">
-          <div class="card"> Получено: {{ moment(scans[0].date).fromNow() }} </div>
-          <div> {{ moment(scans[0].date).format('LLL') }} </div>
-        </div>
-        </div>
+        <OverlayPanel ref="opScans" class="shadow-2">
+          <DataTable :value="scans" size="small">
+            <Column field="tovar_count" header="Товаров" ></Column>
+            <Column field="date" header="Дата" sortable>
+              <template #body="scn">
+                {{ moment(scn.data.date).format('DD.MM.YYYY - HH:mm') }}
+              </template>
+            </Column>
+          </DataTable>
+
+        </OverlayPanel>
       </template>
       <Column field="id_kramp" header="ID" sortable></Column>
       <Column field="vendor_code" header="Артикул" sortable></Column>
@@ -78,7 +89,9 @@
               v-model="filters.site.checkbox" @update:model-value="value => { filters.site.value=(value===null?null:(value?1:0));}"
               class="mr-2"
           />
-          На сайте
+          <template v-if="filters.site.value === null">Все</template>
+          <template v-else-if="filters.site.value == 1">Есть на сайте</template>
+          <template v-else >Нет на сайте</template>
         </template>
         <template #body="dat">
           <template v-if="dat.data.site == 1">Добавлено </template>
@@ -97,7 +110,7 @@
 <!--        </template>-->
 <!--      </Column>-->
 <!--      <Column field="info" header="Инфо"></Column>-->
-      <template #footer> Всего {{ totalRecords ? totalRecords : 0 }} позиций. </template>
+      <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
   </div>
 </template>
@@ -113,17 +126,23 @@ import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
 import TriStateCheckbox from 'primevue/tristatecheckbox'
 import Tag from 'primevue/tag';
+import OverlayPanel from 'primevue/overlaypanel';
 
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
 
 
 const totalRecords = ref(0)
+const totalRecordsFiltered = ref(0)
 const rows = ref(10);
 
 const products = ref([]);
 const scans = ref([]);
 
+const opScans = ref();
+
+const filter = (ev)=>{ totalRecordsFiltered.value = ev.filteredValue.length; console.log(ev);}
+const toggleScans = (event)=>{ opScans.value.toggle(event) };
 const rowClass = (data) => {
 //  return [{ 'bg-gray-400': data.site == 0 }];
   return [{ 'text-400 bg-gray-100': data.site == 0 }];
