@@ -31,8 +31,8 @@
             </IconField>
           </div>
           <div class="flex flex-column align-items-center" @click="toggleScans">
-            <div class="card"> Получено: {{ moment(scans[0].date).fromNow() }} </div>
-            <div> {{ moment(scans[0].date).format('LLL') }} </div>
+            <div class="card"> Получено: {{ moment(scans[0]?.date).fromNow() }} </div>
+            <div> {{ moment(scans[0]?.date).format('LLL') }} </div>
           </div>
         </div>
         <OverlayPanel ref="opScans" class="shadow-2">
@@ -65,24 +65,28 @@
                  value=""
                  v-tooltip="{ value: 'Акция', showDelay: 500 }"
             >
-
             </Tag>
         </template>
       </Column>
 
       <Column field="price_base" header="&#8364;" sortable></Column>
-      <Column field="tovar_count" header="Количество" sortable>
-        <template #body="slotProps">
-          <div class="flex justify-content-between">
-          <div>
-            {{ slotProps.data.tovar_count }}
+
+      <Column body-class="flex " field="tovar_count" header="Количество, шт" sortable>
+        <template #body="dat">
+          <div class="flex-initial w-3rem text-right pr-1">
+            {{ dat.data.tovar_count }}
           </div>
-          <div v-if="slotProps.data.tovar_count_old">
-            ({{ slotProps.data.tovar_count - slotProps.data.tovar_count_old }})
-          </div>
-          </div>
+          <template v-if="dat.data.tovar_count_old">
+            <div class="flex-initial w-4rem text-right pr-1 ">
+              {{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? '+':''}}{{dat.data.tovar_count - dat.data.tovar_count_old }}
+            </div>
+            <div>
+              {{ getMessageTimeoutInDays(dat.data.tovar_count_date) }}
+            </div>
+          </template>
         </template>
       </Column>
+
       <Column field="site"  sortable>
         <template #header>
           <TriStateCheckbox
@@ -94,9 +98,11 @@
           <template v-else >Нет на сайте</template>
         </template>
         <template #body="dat">
-          <template v-if="dat.data.site == 1">Добавлено </template>
-          <template v-else>Удалено </template>
-          {{ moment(dat.data.site_date).fromNow() }}
+          <template v-if="dat.data.site_old !== null">
+            <template v-if="dat.data.site == 1">Добавлено </template>
+            <template v-else-if="dat.data.site == 0">Удалено </template>
+            {{ getMessageTimeoutInDays(dat.data.site_date) }}
+          </template>
         </template>
       </Column>
 <!--      <Column field="brand" header="Бренд">-->
@@ -114,7 +120,6 @@
     </DataTable>
   </div>
 </template>
-
 <script setup>
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -141,12 +146,21 @@ const scans = ref([]);
 
 const opScans = ref();
 
+const getMessageTimeoutInDays = (dat)=>{
+  let days = moment(dat).startOf('day').diff(moment.now(),'days');
+  console.log(days);
+  switch (days){
+    case 0: return "сегодня";
+    case -1: return "вчера";
+  }
+  return moment.duration(days,"days").humanize(true);
+}
+
 const filter = (ev)=>{ totalRecordsFiltered.value = ev.filteredValue.length; console.log(ev);}
 const toggleScans = (event)=>{ opScans.value.toggle(event) };
 const rowClass = (data) => {
 //  return [{ 'bg-gray-400': data.site == 0 }];
   return [{ 'text-400 bg-gray-100': data.site == 0 }];
-
 };
 
 const filters = ref({
@@ -170,7 +184,7 @@ const url = computed(()=>{
 //    keys=`&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`;
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}${keys}`
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`
-  return `http://192.168.50.5:3004/all`
+  return `http://192.168.50.50:3004/all`
 })
 const {isFetching:loading, error, data:data0 } = useFetch(url, {
   refetch: true,
@@ -189,7 +203,7 @@ const {isFetching:loading, error, data:data0 } = useFetch(url, {
 const getScans = ()=>{
 
 }
-const {isFetching:loadingScans, error:error1 } =  useFetch(`http://192.168.50.5:3004/scans`, {
+const {isFetching:loadingScans, error:error1 } = useFetch(`http://192.168.50.50:3004/scans`, {
   afterFetch(ctx){
     scans.value = ctx.data.rowData;
     return ctx
