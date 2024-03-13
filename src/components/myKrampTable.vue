@@ -67,17 +67,29 @@
         </template>
       </Column>
 
-      <Column body-class="relative flex justify-content-center" field="price" header="&#8381;" sortable>
+      <Column body-class="relative flex" field="price" header="&#8381;" sortable>
         <template #body="dat">
-            <div class="z-1"> {{ dat.data.price }} </div>
-            <Tag class="z-0 w-2 h-1rem absolute top-0 right-0"
-                 v-if="dat.data.sale"
-                 icon="pi pi-info-circle"
-                 severity="info"
-                 value=""
-                 v-tooltip="{ value: 'Акция', showDelay: 500 }"
-            >
-            </Tag>
+          <div class="z-1 flex-initial w-3rem text-right pr-1">
+             {{ dat.data.price }}
+          </div>
+          <template v-if="dat.data.price_old && moment(showDate).isSameOrBefore(dat.data.price_date)">
+            <div class="flex-initial w-6rem text-right pr-1 ">
+              {{(dat.data.price - dat.data.price_old)>0 ? '+':''}}{{(dat.data.price - dat.data.price_old).toFixed(2)}}
+              ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(0) }}%)
+            </div>
+            <div>
+              {{ getMessageTimeoutInDays(dat.data.price_date) }}
+            </div>
+          </template>
+
+          <Tag class="z-0 w-1rem h-1rem absolute top-0 right-0"
+               v-if="dat.data.sale"
+               icon="pi pi-info-circle"
+               severity="info"
+               value=""
+               v-tooltip="{ value: 'Акция', showDelay: 500 }"
+          >
+          </Tag>
         </template>
       </Column>
 
@@ -111,25 +123,12 @@
         </template>
         <template #body="dat">
           <template v-if="dat.data.site_date_old && moment(showDate).isSameOrBefore(dat.data.site_date)">
-<!--          <template v-if="dat.data.site_date_old">-->
-<!--            <template v-if="dat.data.site_old !== null">-->
             <template v-if="dat.data.site == 1">Добавлено </template>
             <template v-else-if="dat.data.site == 0">Удалено </template>
             {{ getMessageTimeoutInDays(dat.data.site_date) }}
           </template>
         </template>
       </Column>
-<!--      <Column field="brand" header="Бренд">-->
-<!--        <template #body="slotProps">-->
-<!--          {{ brands.get(slotProps.data.brand)?.Name }}-->
-<!--        </template>-->
-<!--      </Column>-->
-<!--      <Column field="brand" header="Страна">-->
-<!--        <template #body="slotProps">-->
-<!--          {{ brands.get(slotProps.data.brand)?.Country }}-->
-<!--        </template>-->
-<!--      </Column>-->
-<!--      <Column field="info" header="Инфо"></Column>-->
       <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
   </div>
