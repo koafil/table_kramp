@@ -1,4 +1,5 @@
 <template>
+  {{ expandedRows }}
   <span v-if="loading || loadingScans"> Загрузка...</span>
   <span v-else-if="error|| error1"> Ошибка загрузки: {{ error }} </span>
   <div v-else class="card">
@@ -21,13 +22,14 @@
                size="small"
                scrollable
                @filter = "filter"
+               v-model:expandedRows="expandedRows"
     >
       <template #header>
         <div class="flex justify-content-between align-items-center flex-wrap" >
           <div>
             <IconField iconPosition="left">
               <InputIcon class="pi pi-search"> </InputIcon>
-              <InputText v-model="filters['global'].value" placeholder="Поиск" />
+              <InputText v-model="filters['global'].value" placeholder="Поиск"  autofocus />
             </IconField>
           </div>
           <div class="flex align-items-center">
@@ -44,73 +46,77 @@
 <!--          <Calendar  v-model="showDate" inline :max-date="new Date()" @update:modelValue="(value)=>{ nDays=getNumberTimeoutInDays(value); }" />-->
           <Calendar  v-model="showDate" inline :max-date="new Date()" @update:modelValue="toggleDays"/>
         </OverlayPanel>
-        <OverlayPanel ref="opScans" class="shadow-2">
-          <DataTable :value="scans" size="small">
-            <template #header>
-              Получено с сайта:
-            </template>
-            <Column field="tovar_count" header="Товаров" ></Column>
-            <Column field="date" header="Дата" sortable>
-              <template #body="scn">
-                {{ moment(scn.data.date).format('DD.MM.YYYY - HH:mm') }}
-              </template>
-            </Column>
-          </DataTable>
+        <OverlayPanel ref="opScans" class="shadow-2 "  appendTo="body">
+          <div class="w-25rem" >
+          <my-log-table />
+          </div>
+<!--          <DataTable :value="scans" size="small">-->
+<!--            <template #header>-->
+<!--              Получено с сайта:-->
+<!--            </template>-->
+<!--            <Column field="tovar_count" header="Товаров" ></Column>-->
+<!--            <Column field="date" header="Дата" sortable>-->
+<!--              <template #body="scn">-->
+<!--                {{ moment(scn.data.date).format('DD.MM.YYYY - HH:mm') }}-->
+<!--              </template>-->
+<!--            </Column>-->
+<!--          </DataTable>-->
 
         </OverlayPanel>
       </template>
-      <Column field="id_kramp" header="ID" sortable></Column>
+      <!--      <Column field="id_kramp" header="ID" sortable></Column>-->
+      <Column bodyClass="py-0 w-1rem" expander ></Column>
       <Column field="vendor_code" header="Артикул" sortable></Column>
       <Column field="name" header="Название" sortable>
         <template #filter="{ filterModel, filterCallback }">
           <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
         </template>
       </Column>
-
-      <Column body-class="relative flex" field="price" header="&#8381;" sortable>
+      <Column body-class="relative " field="price" header="&#8381;" sortable>
         <template #body="dat">
-          <div class="z-1 flex-initial w-3rem text-right pr-1">
-             {{ dat.data.price }}
-          </div>
-          <template v-if="dat.data.price_old && moment(showDate).isSameOrBefore(dat.data.price_date)">
-            <div class="flex-initial w-6rem text-right pr-1 ">
-              {{(dat.data.price - dat.data.price_old)>0 ? '+':''}}{{(dat.data.price - dat.data.price_old).toFixed(2)}}
-              ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(0) }}%)
+          <div class="flex">
+            <div class="z-1 flex-initial w-3rem text-right pr-1">
+               {{ dat.data.price }}
             </div>
-            <div>
-              {{ getMessageTimeoutInDays(dat.data.price_date) }}
-            </div>
-          </template>
+            <template v-if="dat.data.price_old && moment(showDate).isSameOrBefore(dat.data.price_date)">
+              <div class="flex-initial w-7rem text-right pr-1 ">
+                {{(dat.data.price - dat.data.price_old)>0 ? '+':''}}{{(dat.data.price - dat.data.price_old).toFixed(2)}}
+                ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(0) }}%)
+              </div>
+              <div>
+                {{ getMessageTimeoutInDays(dat.data.price_date) }}
+              </div>
+            </template>
 
-          <Tag class="z-0 w-1rem h-1rem absolute top-0 right-0"
-               v-if="dat.data.sale"
-               icon="pi pi-info-circle"
-               severity="info"
-               value=""
-               v-tooltip="{ value: 'Акция', showDelay: 500 }"
-          >
-          </Tag>
+            <Tag class="z-0 w-1rem h-1rem absolute top-0 right-0"
+                 v-if="dat.data.sale"
+                 icon="pi pi-info-circle"
+                 severity="info"
+                 value=""
+                 v-tooltip="{ value: 'Акция', showDelay: 500 }"
+            >
+            </Tag>
+          </div>
         </template>
       </Column>
-
       <Column field="price_base" header="&#8364;" sortable></Column>
-
-      <Column body-class="flex " field="tovar_count" header="Количество, шт" sortable>
+      <Column field="tovar_count" header="Количество, шт" sortable>
         <template #body="dat">
-          <div class="flex-initial w-3rem text-right pr-1">
-            {{ dat.data.tovar_count }}
+          <div class="flex">
+            <div class="flex-initial w-3rem text-right pr-1">
+              {{ dat.data.tovar_count }}
+            </div>
+            <template v-if="dat.data.tovar_count_old && moment(showDate).isSameOrBefore(dat.data.tovar_count_date)">
+              <div class="flex-initial w-4rem text-right pr-1 ">
+                {{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? '+':''}}{{dat.data.tovar_count - dat.data.tovar_count_old }}
+              </div>
+              <div>
+                {{ getMessageTimeoutInDays(dat.data.tovar_count_date) }}
+              </div>
+            </template>
           </div>
-          <template v-if="dat.data.tovar_count_old && moment(showDate).isSameOrBefore(dat.data.tovar_count_date)">
-            <div class="flex-initial w-4rem text-right pr-1 ">
-              {{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? '+':''}}{{dat.data.tovar_count - dat.data.tovar_count_old }}
-            </div>
-            <div>
-              {{ getMessageTimeoutInDays(dat.data.tovar_count_date) }}
-            </div>
-          </template>
         </template>
       </Column>
-
       <Column field="site"  sortable>
         <template #header>
           <TriStateCheckbox
@@ -129,11 +135,16 @@
           </template>
         </template>
       </Column>
+      <template #expansion="dat">
+        {{ dat.data }}
+      </template>
       <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
   </div>
 </template>
 <script setup>
+import myLogTable from './myLogTable.vue'
+
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext'
@@ -148,6 +159,7 @@ import OverlayPanel from 'primevue/overlaypanel';
 import SplitButton from 'primevue/splitbutton';
 import Calendar from 'primevue/calendar';
 
+
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
 
@@ -161,6 +173,7 @@ const rows = ref(10);
 
 const products = ref([]);
 const scans = ref([]);
+const expandedRows = ref([]);
 //всплывающая панель последних сканирований
 const opScans = ref();
 //всплывающая панель изменения количества отображаемых дней
@@ -234,7 +247,7 @@ const url = computed(()=>{
 //    keys=`&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`;
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}${keys}`
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`
-  return `http://192.168.50.50:3004/all`
+  return `http://192.168.50.5:3004/all`
 })
 const {isFetching:loading, error, data:data0 } = useFetch(url, {
   refetch: true,
@@ -244,22 +257,15 @@ const {isFetching:loading, error, data:data0 } = useFetch(url, {
     return ctx
   }
 }).json();
-// const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
-//   afterFetch(ctx){
-//     scans.value = ctx.data.rowData;
-//     return ctx
-//   }
-// }).json();
-const getScans = ()=>{
-
-}
-const {isFetching:loadingScans, error:error1 } = useFetch(`http://192.168.50.50:3004/scans`, {
+const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
   afterFetch(ctx){
     scans.value = ctx.data.rowData;
     return ctx
   }
 }).json();
+const getScans = ()=>{
 
+}
 /*const {isFetching:loadingBrand, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3002/brands`, {
   afterFetch(ctx){
     brands_mass.value = ctx.data.rowData;
