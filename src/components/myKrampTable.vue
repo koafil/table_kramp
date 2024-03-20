@@ -1,8 +1,5 @@
 <template>
-  {{ expandedRows }}
-  <span v-if="loading || loadingScans"> Загрузка...</span>
-  <span v-else-if="error|| error1"> Ошибка загрузки: {{ error }} </span>
-  <div v-else class="card">
+    <div class="card">
     <!--    Keys: {{ findKeyArr }}-->
     <!--    {{ data1.rowData[1] }}-->
     <!--    {{ brands }}-->
@@ -24,6 +21,9 @@
                @filter = "filter"
                v-model:expandedRows="expandedRows"
     >
+      <template #empty>
+        <template v-if="error">Ошибка: {{ error }}</template> <template v-else>Нет записей </template>
+      </template>
       <template #header>
         <div class="flex justify-content-between align-items-center flex-wrap" >
           <div>
@@ -33,36 +33,10 @@
             </IconField>
           </div>
           <div class="flex align-items-center">
-            <span class="mr-2">Последние<br> изменения</span>
-<!--            <Button class="mr-3" size="small" severity="secondary" :label="strDays" @click="toggleDays" />-->
-            <SplitButton class="mr-3" size="small" severity="secondary" :label="strDays" @click="toggleDays" :model="menuDaysItems" outlined/>
-            <div class="flex flex-column align-items-center" @click="toggleScans">
-              <div class="card"> Получено: {{ moment(scans[0]?.date).fromNow() }} </div>
-              <div> {{ moment(scans[0]?.date).format('LLL') }} </div>
-            </div>
+            <LastChangesDate v-model="showDate"/>
+            <scan-info />
           </div>
         </div>
-        <OverlayPanel ref="opDays" class="shadow-2">
-<!--          <Calendar  v-model="showDate" inline :max-date="new Date()" @update:modelValue="(value)=>{ nDays=getNumberTimeoutInDays(value); }" />-->
-          <Calendar  v-model="showDate" inline :max-date="new Date()" @update:modelValue="toggleDays"/>
-        </OverlayPanel>
-        <OverlayPanel ref="opScans" class="shadow-2 "  appendTo="body">
-          <div class="w-25rem" >
-          <my-log-table />
-          </div>
-<!--          <DataTable :value="scans" size="small">-->
-<!--            <template #header>-->
-<!--              Получено с сайта:-->
-<!--            </template>-->
-<!--            <Column field="tovar_count" header="Товаров" ></Column>-->
-<!--            <Column field="date" header="Дата" sortable>-->
-<!--              <template #body="scn">-->
-<!--                {{ moment(scn.data.date).format('DD.MM.YYYY - HH:mm') }}-->
-<!--              </template>-->
-<!--            </Column>-->
-<!--          </DataTable>-->
-
-        </OverlayPanel>
       </template>
       <!--      <Column field="id_kramp" header="ID" sortable></Column>-->
       <Column bodyClass="py-0 w-1rem" expander ></Column>
@@ -143,7 +117,6 @@
   </div>
 </template>
 <script setup>
-import myLogTable from './myLogTable.vue'
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -165,6 +138,8 @@ import Slider from 'primevue/slider';
 
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
+import ScanInfo from "./ScanInfo.vue";
+import LastChangesDate from "./LastChangesDate.vue";
 
 
 const totalRecords = ref(0)
@@ -172,22 +147,15 @@ const totalRecordsFiltered = ref(0)
 const rows = ref(10);
 
 const products = ref([]);
-const scans = ref([]);
 const expandedRows = ref([]);
-//всплывающая панель последних сканирований
-const opScans = ref();
-//всплывающая панель изменения количества отображаемых дней
-const opDays = ref();
 
-// const showDate = ref(new Date((new Date()).setDate((new Date().getDate()+beginNDay))));
 const showDate = ref(new Date((new Date()).setHours(0, 0, 0, 0)));
-//const showDate = ref(new Date(2024, 2, 9 ));
 
-//Date от текущего момента в днях
-const getDateFromTimeout = (timeoutInDays) => {
-  let datNow = new Date().setHours(0, 0, 0, 0);
-  return new Date((new Date(datNow)).setDate((new Date(datNow).getDate()+timeoutInDays)));
-}
+// //Date от текущего момента в днях
+// const getDateFromTimeout = (timeoutInDays) => {
+//   let datNow = new Date().setHours(0, 0, 0, 0);
+//   return new Date((new Date(datNow)).setDate((new Date(datNow).getDate()+timeoutInDays)));
+// }
 //число дней от текущего момента
 const getNumberTimeoutInDays = (dat)=>{
   return moment(dat).startOf('day').diff(moment.now(),'days');
@@ -201,26 +169,16 @@ const getMessageTimeoutInDays = (dat)=>{
   }
   return moment.duration(days,"days").humanize(true);
 }
-//количество дней в текстовом виде от числа дней
-const strDays = computed(()=>{
-  let days = getNumberTimeoutInDays(showDate.value);
-  switch (days){
-    case 0: return "сегодня";
-    case -1: return "со вчера";
-  }
-  return `от ${(days*-1).toString()} дней назад` ;
-});
-//меню выбора периода отображения
-const menuDaysItems = [
-  { label: 'за сегодня', command: () => {  showDate.value=getDateFromTimeout(0);  } },
-  { label: 'со вчера',   command: () => {  showDate.value=getDateFromTimeout(-1); }  },
-  { label: 'от 3 дней',  command: () => {  showDate.value=getDateFromTimeout(-3); }  },
-  { label: 'от недели',  command: () => {  showDate.value=getDateFromTimeout(-7); }  },
-  { label: 'от месяца',  command: () => {  showDate.value=getDateFromTimeout(-30);}  },
-];
-const filter = (ev)=>{ totalRecordsFiltered.value = ev.filteredValue.length; console.log(ev);}
-const toggleScans = (event)=>{ opScans.value.toggle(event) };
-const toggleDays = (event)=>{ opDays.value.toggle(event) };
+// //количество дней в текстовом виде от числа дней
+// const strDays = computed(()=>{
+//   let days = getNumberTimeoutInDays(showDate.value);
+//   switch (days){
+//     case 0: return "сегодня";
+//     case -1: return "со вчера";
+//   }
+//   return `от ${(days*-1).toString()} дней назад` ;
+// });
+const filter = (ev)=>{ totalRecordsFiltered.value = ev.filteredValue.length; }
 const rowClass = (data) => {
 //  return [{ 'bg-gray-400': data.site == 0 }];
   return [{ 'text-400 bg-gray-100': data.site == 0 }];
@@ -257,22 +215,6 @@ const {isFetching:loading, error, data:data0 } = useFetch(url, {
     return ctx
   }
 }).json();
-const {isFetching:loadingScans, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3004/scans`, {
-  afterFetch(ctx){
-    scans.value = ctx.data.rowData;
-    return ctx
-  }
-}).json();
-const getScans = ()=>{
-
-}
-/*const {isFetching:loadingBrand, error:error1, data:data1 } = useFetch(`http://192.168.50.5:3002/brands`, {
-  afterFetch(ctx){
-    brands_mass.value = ctx.data.rowData;
-    return ctx
-  }
-}).json();
-*/
 
 </script>
 
