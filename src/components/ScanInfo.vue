@@ -8,7 +8,7 @@
   </div>
   <OverlayPanel ref="opScans" class="shadow-2"  >
     <div class="w-25rem" >
-      <DataTable lazy :loading="isFetching"  scrollable  scrollHeight="400px" :virtualScrollerOptions="{ itemSize: 40 }" :value="scans" size="small"  >
+      <DataTable  :loading="isFetching"  scrollable  scrollHeight="400px" :virtualScrollerOptions="{ itemSize: 40 }" :value="scans" size="small"  >
         <template #empty>
           <template v-if="error">Ошибка: {{ error }}</template> <template v-else>Нет записей </template>
         </template>
@@ -44,7 +44,7 @@ const opScans = ref();
 
 const toggleScans = (event)=>{ opScans.value.toggle(event) };
 
-const {isFetching, error } = useFetch(`http://192.168.50.5:3004/scans`, {
+const {isFetching, error } = useFetch(`http://192.168.50.50:3004/scans`, {
   afterFetch(ctx){
     scans.value = ctx.data.rowData;
     return ctx

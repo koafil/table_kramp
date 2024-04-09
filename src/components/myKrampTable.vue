@@ -39,7 +39,7 @@
         </div>
       </template>
       <!--      <Column field="id_kramp" header="ID" sortable></Column>-->
-      <Column bodyClass="py-0 w-1rem" expander ></Column>
+<!--      <Column bodyClass="py-0 w-1rem" expander ></Column>-->
       <Column field="vendor_code" header="Артикул" sortable></Column>
       <Column field="name" header="Название" sortable>
         <template #filter="{ filterModel, filterCallback }">
@@ -76,13 +76,32 @@
       <Column field="price_base" header="&#8364;" sortable></Column>
       <Column field="tovar_count" header="Количество, шт" sortable>
         <template #body="dat">
-          <div class="flex">
+          <div class="flex"
+               @contextmenu.prevent="(e)=>{
+                 sLog.tableName='count';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+               @click="()=>{opLog.hide();}"
+
+          >
             <div class="flex-initial w-3rem text-right pr-1">
               {{ dat.data.tovar_count }}
             </div>
             <template v-if="dat.data.tovar_count_old && moment(showDate).isSameOrBefore(dat.data.tovar_count_date)">
               <div class="flex-initial w-4rem text-right pr-1 ">
-                {{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? '+':''}}{{dat.data.tovar_count - dat.data.tovar_count_old }}
+<!--                {{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? '+':''}}{{dat.data.tovar_count - dat.data.tovar_count_old }}-->
+<!--                <Chip icon="pi pi-google" label:="(dat.data.tovar_count - dat.data.tovar_count_old).toString() ">-->
+<!--                <Badge severity='secondary'>-->
+<!--                <Badge class:="[{ 'p-badge-warning': true }]">-->
+<!--                  <Badge class='p-badge-warning'">-->
+<!--                <Badge severity="{{(dat.data.tovar_count - dat.data.tovar_count_old)>0 ? 'secondary':'success' }}" >-->
+                <Badge v-if="(dat.data.tovar_count - dat.data.tovar_count_old)>0"  severity='secondary'>
+                  +{{dat.data.tovar_count - dat.data.tovar_count_old }}
+                </Badge>
+                <Badge v-else>
+                  {{dat.data.tovar_count - dat.data.tovar_count_old }}
+                </Badge>
               </div>
               <div>
                 {{ getMessageTimeoutInDays(dat.data.tovar_count_date) }}
@@ -115,6 +134,10 @@
       <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
   </div>
+  <OverlayPanel ref="opLog" class="shadow-2" @contextmenu.prevent="()=>opLog.hide()">
+    <log-table :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
+  </OverlayPanel>
+
 </template>
 <script setup>
 
@@ -122,13 +145,15 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext'
 import { useFetch} from "@vueuse/core";
-import { ref, onMounted, computed} from 'vue';
+import { ref, onMounted, computed, defineAsyncComponent} from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
 import TriStateCheckbox from 'primevue/tristatecheckbox'
 import Tag from 'primevue/tag';
 import OverlayPanel from 'primevue/overlaypanel';
+import Badge from 'primevue/badge';
+import Chip from 'primevue/chip';
 import SplitButton from 'primevue/splitbutton';
 import Calendar from 'primevue/calendar';
 
@@ -140,7 +165,17 @@ import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
 import ScanInfo from "./ScanInfo.vue";
 import LastChangesDate from "./LastChangesDate.vue";
+import LogTable from "./LogTable.vue";
 
+// const ScanInfo = defineAsyncComponent(() => import("./ScanInfo.vue"))
+
+const opLog = ref();
+const sLog = ref({
+  tableName: '',
+  id_kramp: 0,
+//  id_scan: 0
+})
+//const toggleLog = (event)=>{ opLog.value.toggle(event) };
 
 const totalRecords = ref(0)
 const totalRecordsFiltered = ref(0)
@@ -205,7 +240,7 @@ const url = computed(()=>{
 //    keys=`&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`;
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}${keys}`
 //  return `http://192.168.50.5:3002/tovars?page=${page.value}&npp=${rows.value}&ss=${encodeURI(JSON.stringify(props.findKeyArr))}`
-  return `http://192.168.50.5:3004/all`
+  return `http://192.168.50.50:3004/all`
 })
 const {isFetching:loading, error, data:data0 } = useFetch(url, {
   refetch: true,

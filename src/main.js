@@ -14,7 +14,9 @@ import App from './App.vue'
 const app = createApp(App);
 
 import Tooltip from 'primevue/tooltip';
+import BadgeDirective from 'primevue/badgedirective';
 
+app.directive('badge', BadgeDirective);
 app.directive('tooltip', Tooltip);
 
 
