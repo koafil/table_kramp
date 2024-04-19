@@ -173,6 +173,7 @@ const opLog = ref();
 const sLog = ref({
   tableName: '',
   id_kramp: 0,
+
 //  id_scan: 0
 })
 //const toggleLog = (event)=>{ opLog.value.toggle(event) };

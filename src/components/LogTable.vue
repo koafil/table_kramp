@@ -9,8 +9,16 @@
 <!--    <template #header>-->
 <!--      Получено с сайта:-->
 <!--    </template>-->
-    <Column field="id_scan" header="#" ></Column>
-    <Column field="val" body-class="text-center" header="Товаров" ></Column>
+<!--    <Column field="id_scan" header="#" ></Column>-->
+      <Column field="val" body-class="text-center" :header="strColumbName()" ></Column>
+      <Column field="val_old" body-class="text-center" header="Изменение" >
+        <template #body="scn">
+          <template v-if="scn.data.val_old === null"> -- </template>
+          <template v-else>
+            {{ scn.data.val - scn.data.val_old }}
+          </template>
+        </template>
+      </Column>
     <Column field="date" header="Дата" sortable>
       <template #body="scn">
         {{ moment(scn.data.date).format('DD.MM.YYYY - HH:mm') }}
@@ -24,7 +32,7 @@
 
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {useFetch} from "@vueuse/core";
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
@@ -34,6 +42,10 @@ const props = defineProps({
   id_kramp: {type: Number, default: 0}
 });
 
+const strColumbName = ()=>{
+  if(props.tableName == 'count') return 'Кол-во';
+  return '--';
+};
 const logData = ref([]);
 
 const {isFetching, error } = useFetch(`http://192.168.50.50:3004/log/${props.tableName}?id_kramp=${props.id_kramp}`, {
