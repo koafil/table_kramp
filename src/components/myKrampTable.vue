@@ -40,10 +40,35 @@
       </template>
       <!--      <Column field="id_kramp" header="ID" sortable></Column>-->
 <!--      <Column bodyClass="py-0 w-1rem" expander ></Column>-->
-      <Column field="vendor_code" header="Артикул" sortable></Column>
+      <Column field="vendor_code" header="Артикул" sortable>
+        <template #body="dat">
+          <div
+              @contextmenu.prevent="(e)=>{
+                 sLog.tableName='vendor_code';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+              @click="()=>{opLog.hide();}"
+          >
+            {{ dat.data.vendor_code }}
+          </div>
+          </template>
+      </Column>
       <Column field="name" header="Название" sortable>
         <template #filter="{ filterModel, filterCallback }">
           <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
+        </template>
+        <template #body="dat">
+          <div
+              @contextmenu.prevent="(e)=>{
+                 sLog.tableName='name';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+              @click="()=>{opLog.hide();}"
+          >
+            {{ dat.data.name }}
+          </div>
         </template>
       </Column>
       <Column body-class="relative " field="price" header="&#8381;" sortable>
@@ -88,7 +113,41 @@
           </div>
         </template>
       </Column>
-      <Column field="price_base" header="&#8364;" sortable></Column>
+      <Column field="price_base" header="&#8364;" sortable>
+        <template #body="dat">
+          <div
+              @contextmenu.prevent="(e)=>{
+                 sLog.tableName='price_base';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+              @click="()=>{opLog.hide();}"
+          >
+            <div class="flex">
+              <div class="z-1 flex-initial w-3rem text-right pr-1">
+                {{ dat.data.price_base }}
+              </div>
+              <template v-if="dat.data.price_base_old && moment(showDate).isSameOrBefore(dat.data.price_base_date)">
+                <div class="flex-initial w-7rem text-right pr-1 ">
+                  <Badge v-if="(dat.data.price_base - dat.data.price_base_old)>0"  severity='secondary'>
+                    +{{(dat.data.price_base - dat.data.price_base_old).toFixed(2)}}
+                    ({{ (((dat.data.price_base - dat.data.price_base_old)/dat.data.price_base_old)*100).toFixed(2) }}%)
+                  </Badge>
+                  <Badge v-else>
+                    {{(dat.data.price_base - dat.data.price_base_old).toFixed(2)}}
+                    ({{ (((dat.data.price_base - dat.data.price_base_old)/dat.data.price_base_old)*100).toFixed(2) }}%)
+                  </Badge>
+                </div>
+                <div>
+                  {{ getMessageTimeoutInDays(dat.data.price_base_date) }}
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </template>
+
+      </Column>
       <Column field="tovar_count" header="Количество, шт" sortable>
         <template #body="dat">
           <div class="flex"
@@ -136,11 +195,22 @@
           <template v-else >Нет на сайте</template>
         </template>
         <template #body="dat">
-          <template v-if="dat.data.site_date_old && moment(showDate).isSameOrBefore(dat.data.site_date)">
-            <template v-if="dat.data.site == 1">Добавлено </template>
-            <template v-else-if="dat.data.site == 0">Удалено </template>
-            {{ getMessageTimeoutInDays(dat.data.site_date) }}
-          </template>
+          <div
+              @contextmenu.prevent="(e)=>{
+                 sLog.tableName='site';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+              @click="()=>{opLog.hide();}"
+          >
+            <i v-if="dat.data.site == 1" class="pi pi-check-circle mr-1" :class="{ 'text-green-500': dat.data.tovar_count, 'text-red-500': !dat.data.tovar_count }" ></i>
+            <i v-else class="pi pi-times-circle mr-1 text-gray-500"></i>
+            <template v-if="dat.data.site_date_old && moment(showDate).isSameOrBefore(dat.data.site_date)">
+              <template v-if="dat.data.site == 1">Добавлено </template>
+              <template v-else-if="dat.data.site == 0">Удалено </template>
+              {{ getMessageTimeoutInDays(dat.data.site_date) }}
+            </template>
+          </div>
         </template>
       </Column>
       <template #expansion="dat">
@@ -232,7 +302,7 @@ const getMessageTimeoutInDays = (dat)=>{
 const filter = (ev)=>{ totalRecordsFiltered.value = ev.filteredValue.length; }
 const rowClass = (data) => {
 //  return [{ 'bg-gray-400': data.site == 0 }];
-  return [{ 'text-400 bg-gray-100': data.site == 0 }];
+  return [{ 'text-400 bg-gray-100': data.site == 0 || data.tovar_count == 0 }];
 };
 
 const filters = ref({

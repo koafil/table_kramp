@@ -5,7 +5,17 @@
     <template #empty>
       <template v-if="error">Ошибка: {{ error }}</template> <template v-else>Нет записей </template>
     </template>
-      <Column field="val" body-class="text-center" :header="strColumbName()" ></Column>
+      <Column field="val" body-class="text-center" :header="strColumbName()" >
+        <template #body="dat">
+          <template v-if="tableName == 'site'">
+            <i v-if="dat.data.val" class="pi pi-check-circle mr-1 text-green-500"></i>
+            <i v-else class="pi pi-times-circle mr-1 text-gray-500"></i>
+          </template>
+          <template v-else>
+            {{ dat.data.val }}
+          </template>
+        </template>
+      </Column>
       <Column field="val_old" body-class="text-center" header="Изм." >
         <template #body="dat">
           <template v-if="dat.data.val_old === null"> -- </template>
@@ -18,7 +28,7 @@
                 {{dat.data.val - dat.data.val_old }}
               </Badge>
             </template>
-            <template v-if="tableName == 'price'">
+            <template v-else-if="tableName == 'price' || tableName == 'price_base'">
               <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
                 +{{(dat.data.val - dat.data.val_old).toFixed(2) }} (+{{ (((dat.data.val - dat.data.val_old)/dat.data.val_old)*100).toFixed(2) }}%)
               </Badge>
@@ -26,6 +36,11 @@
                 {{(dat.data.val - dat.data.val_old).toFixed(2) }} ({{ (((dat.data.val - dat.data.val_old)/dat.data.val_old)*100).toFixed(2) }}%)
               </Badge>
             </template>
+            <template v-else-if="tableName == 'site'">
+              {{ dat.data.val ? 'Выложили':'Убрали' }}
+<!--              {{ dat.data.val  }}-->
+            </template>
+            <template v-else> {{ dat.data.val_old }} </template>
           </template>
         </template>
       </Column>
@@ -55,7 +70,11 @@ const props = defineProps({
 
 const strColumbName = ()=>{
   if(props.tableName == 'count') return 'Кол-во';
-  if(props.tableName == 'price') return 'Цена';
+  if(props.tableName == 'price') return "Цена";
+  if(props.tableName == 'price_base') return "Евро";
+  if(props.tableName == 'vendor_code') return "Артикул";
+  if(props.tableName == 'name') return "Название";
+  if(props.tableName == 'site') return "На сайте";
   return '--';
 };
 const logData = ref([]);
