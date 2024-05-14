@@ -5,17 +5,17 @@
     <template #empty>
       <template v-if="error">Ошибка: {{ error }}</template> <template v-else>Нет записей </template>
     </template>
-
-<!--    <template #header>-->
-<!--      Получено с сайта:-->
-<!--    </template>-->
-<!--    <Column field="id_scan" header="#" ></Column>-->
       <Column field="val" body-class="text-center" :header="strColumbName()" ></Column>
-      <Column field="val_old" body-class="text-center" header="Изменение" >
-        <template #body="scn">
-          <template v-if="scn.data.val_old === null"> -- </template>
+      <Column field="val_old" body-class="text-center" header="Изм." >
+        <template #body="dat">
+          <template v-if="dat.data.val_old === null"> -- </template>
           <template v-else>
-            {{ scn.data.val - scn.data.val_old }}
+            <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
+              +{{dat.data.val - dat.data.val_old }}
+            </Badge>
+            <Badge v-else>
+              {{dat.data.val - dat.data.val_old }}
+            </Badge>
           </template>
         </template>
       </Column>
@@ -36,6 +36,7 @@ import {computed, ref} from "vue";
 import {useFetch} from "@vueuse/core";
 import moment from 'moment/dist/moment';
 import 'moment/dist/locale/ru';
+import Badge from "primevue/badge";
 
 const props = defineProps({
   tableName: {type: String, default: "count"},
