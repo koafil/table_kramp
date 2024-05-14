@@ -10,12 +10,22 @@
         <template #body="dat">
           <template v-if="dat.data.val_old === null"> -- </template>
           <template v-else>
-            <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
-              +{{dat.data.val - dat.data.val_old }}
-            </Badge>
-            <Badge v-else>
-              {{dat.data.val - dat.data.val_old }}
-            </Badge>
+            <template v-if="tableName == 'count'">
+              <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
+                +{{(dat.data.val - dat.data.val_old)}}
+              </Badge>
+              <Badge v-else>
+                {{dat.data.val - dat.data.val_old }}
+              </Badge>
+            </template>
+            <template v-if="tableName == 'price'">
+              <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
+                +{{(dat.data.val - dat.data.val_old).toFixed(2) }} (+{{ (((dat.data.val - dat.data.val_old)/dat.data.val_old)*100).toFixed(2) }}%)
+              </Badge>
+              <Badge v-else>
+                {{(dat.data.val - dat.data.val_old).toFixed(2) }} ({{ (((dat.data.val - dat.data.val_old)/dat.data.val_old)*100).toFixed(2) }}%)
+              </Badge>
+            </template>
           </template>
         </template>
       </Column>
@@ -45,6 +55,7 @@ const props = defineProps({
 
 const strColumbName = ()=>{
   if(props.tableName == 'count') return 'Кол-во';
+  if(props.tableName == 'price') return 'Цена';
   return '--';
 };
 const logData = ref([]);

@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-    <!--    Keys: {{ findKeyArr }}-->
+<!--        Keys: {{ findKeyArr }}-->
     <!--    {{ data1.rowData[1] }}-->
     <!--    {{ brands }}-->
     <DataTable v-model:filters="filters"
@@ -48,14 +48,28 @@
       </Column>
       <Column body-class="relative " field="price" header="&#8381;" sortable>
         <template #body="dat">
+          <div
+              @contextmenu.prevent="(e)=>{
+                 sLog.tableName='price';
+                  sLog.id_kramp=dat.data.id_kramp;
+                  opLog.toggle(e);
+                  }"
+              @click="()=>{opLog.hide();}"
+          >
           <div class="flex">
             <div class="z-1 flex-initial w-3rem text-right pr-1">
                {{ dat.data.price }}
             </div>
             <template v-if="dat.data.price_old && moment(showDate).isSameOrBefore(dat.data.price_date)">
               <div class="flex-initial w-7rem text-right pr-1 ">
-                {{(dat.data.price - dat.data.price_old)>0 ? '+':''}}{{(dat.data.price - dat.data.price_old).toFixed(2)}}
-                ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(0) }}%)
+                <Badge v-if="(dat.data.price - dat.data.price_old)>0"  severity='secondary'>
+                  +{{(dat.data.price - dat.data.price_old).toFixed(2)}}
+                  ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(2) }}%)
+                </Badge>
+                <Badge v-else>
+                  {{(dat.data.price - dat.data.price_old).toFixed(2)}}
+                  ({{ (((dat.data.price - dat.data.price_old)/dat.data.price_old)*100).toFixed(2) }}%)
+                </Badge>
               </div>
               <div>
                 {{ getMessageTimeoutInDays(dat.data.price_date) }}
@@ -70,6 +84,7 @@
                  v-tooltip="{ value: 'Акция', showDelay: 500 }"
             >
             </Tag>
+          </div>
           </div>
         </template>
       </Column>
