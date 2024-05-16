@@ -39,7 +39,7 @@
         </div>
       </template>
       <!--      <Column field="id_kramp" header="ID" sortable></Column>-->
-<!--      <Column bodyClass="py-0 w-1rem" expander ></Column>-->
+      <Column bodyClass="py-0 w-1rem" expander ></Column>
       <Column field="vendor_code" header="Артикул" sortable>
         <template #body="dat">
           <div
@@ -214,7 +214,8 @@
         </template>
       </Column>
       <template #expansion="dat">
-        {{ dat.data }}
+        {{ dat.data.id_kramp }}
+        <log-table-all />
       </template>
       <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
@@ -251,6 +252,7 @@ import 'moment/dist/locale/ru';
 import ScanInfo from "./ScanInfo.vue";
 import LastChangesDate from "./LastChangesDate.vue";
 import LogTable from "./LogTable.vue";
+import LogTableAll from "./LogTableAll.vue";
 
 // const ScanInfo = defineAsyncComponent(() => import("./ScanInfo.vue"))
 
