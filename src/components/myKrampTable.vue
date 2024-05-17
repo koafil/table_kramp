@@ -219,8 +219,21 @@
       <template #footer="dat"> Всего {{ totalRecordsFiltered ? totalRecordsFiltered : 0 }} позиций. </template>
     </DataTable>
   </div>
-  <OverlayPanel ref="opLog" class="shadow-2" @contextmenu.prevent="()=>opLog.hide()">
-    <log-table :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
+  <OverlayPanel ref="opLog" class="shadow-2" pt:content:class="p-0" @contextmenu.prevent="()=>opLog.hide()">
+    <TabView class="">
+      <TabPanel>
+        <template #header>
+          <i class="pi pi-chart-bar"></i>
+        </template>
+        <log-chart :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
+      </TabPanel>
+      <TabPanel>
+        <template #header>
+          <i class="pi pi-list"></i>
+        </template>
+        <log-table :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
+      </TabPanel>
+    </TabView>
   </OverlayPanel>
 
 </template>
@@ -241,6 +254,8 @@ import Badge from 'primevue/badge';
 import Chip from 'primevue/chip';
 import SplitButton from 'primevue/splitbutton';
 import Calendar from 'primevue/calendar';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 
 import Button from 'primevue/button';
@@ -251,6 +266,7 @@ import 'moment/dist/locale/ru';
 import ScanInfo from "./ScanInfo.vue";
 import LastChangesDate from "./LastChangesDate.vue";
 import LogTable from "./LogTable.vue";
+import LogChart from "./LogChart.vue";
 
 // const ScanInfo = defineAsyncComponent(() => import("./ScanInfo.vue"))
 
