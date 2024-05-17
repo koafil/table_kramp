@@ -44,10 +44,12 @@
         <template #body="dat">
           <div
               @contextmenu.prevent="(e)=>{
-                 sLog.tableName='vendor_code';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                sLog.tableName='vendor_code';
+                sLog.id_kramp=dat.data.id_kramp;
+                sLog.showTable = true;
+                sLog.showGraph = false;
+                opLog.toggle(e);
+              }"
               @click="()=>{opLog.hide();}"
           >
             {{ dat.data.vendor_code }}
@@ -61,10 +63,12 @@
         <template #body="dat">
           <div
               @contextmenu.prevent="(e)=>{
-                 sLog.tableName='name';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                sLog.tableName='name';
+                sLog.id_kramp=dat.data.id_kramp;
+                sLog.showTable = true;
+                sLog.showGraph = false;
+                opLog.toggle(e);
+              }"
               @click="()=>{opLog.hide();}"
           >
             {{ dat.data.name }}
@@ -75,10 +79,12 @@
         <template #body="dat">
           <div
               @contextmenu.prevent="(e)=>{
-                 sLog.tableName='price';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                sLog.tableName='price';
+                sLog.id_kramp=dat.data.id_kramp;
+                sLog.showTable = true;
+                sLog.showGraph = true;
+                opLog.toggle(e);
+              }"
               @click="()=>{opLog.hide();}"
           >
           <div class="flex">
@@ -117,10 +123,12 @@
         <template #body="dat">
           <div
               @contextmenu.prevent="(e)=>{
-                 sLog.tableName='price_base';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                sLog.tableName='price_base';
+                sLog.id_kramp=dat.data.id_kramp;
+                sLog.showTable = true;
+                sLog.showGraph = true;
+                opLog.toggle(e);
+              }"
               @click="()=>{opLog.hide();}"
           >
             <div class="flex">
@@ -153,9 +161,11 @@
           <div class="flex"
                @contextmenu.prevent="(e)=>{
                  sLog.tableName='count';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                 sLog.id_kramp=dat.data.id_kramp;
+                 sLog.showTable = true;
+                 sLog.showGraph = true;
+                 opLog.toggle(e);
+               }"
                @click="()=>{opLog.hide();}"
 
           >
@@ -198,9 +208,11 @@
           <div
               @contextmenu.prevent="(e)=>{
                  sLog.tableName='site';
-                  sLog.id_kramp=dat.data.id_kramp;
-                  opLog.toggle(e);
-                  }"
+                 sLog.id_kramp=dat.data.id_kramp;
+                 sLog.showTable = true;
+                 sLog.showGraph = false;
+                 opLog.toggle(e);
+                 }"
               @click="()=>{opLog.hide();}"
           >
             <i v-if="dat.data.site == 1" class="pi pi-check-circle mr-1" :class="{ 'text-green-500': dat.data.tovar_count, 'text-red-500': !dat.data.tovar_count }" ></i>
@@ -220,20 +232,23 @@
     </DataTable>
   </div>
   <OverlayPanel ref="opLog" class="shadow-2" pt:content:class="p-0" @contextmenu.prevent="()=>opLog.hide()">
-    <TabView class="">
-      <TabPanel>
+    <TabView v-if="sLog.showGraph || sLog.showTable">
+      <TabPanel v-if="sLog.showGraph">
         <template #header>
           <i class="pi pi-chart-bar"></i>
         </template>
         <log-chart :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
       </TabPanel>
-      <TabPanel>
+      <TabPanel v-if="sLog.showTable">
         <template #header>
           <i class="pi pi-list"></i>
         </template>
         <log-table :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
       </TabPanel>
     </TabView>
+    <template v-else>
+      <p class="m-3">Небыло изменений</p>
+    </template>
   </OverlayPanel>
 
 </template>
@@ -274,7 +289,8 @@ const opLog = ref();
 const sLog = ref({
   tableName: '',
   id_kramp: 0,
-
+  showTable: false,
+  showGraph: false
 //  id_scan: 0
 })
 //const toggleLog = (event)=>{ opLog.value.toggle(event) };
