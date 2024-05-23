@@ -28,7 +28,7 @@
                 {{dat.data.val - dat.data.val_old }}
               </Badge>
             </template>
-            <template v-else-if="tableName == 'price' || tableName == 'price_base'">
+            <template v-else-if="tableName == 'price' || tableName == 'price_base' || tableName == 'price_liter'">
               <Badge v-if="(dat.data.val - dat.data.val_old)>0"  severity='secondary'>
                 +{{(dat.data.val - dat.data.val_old).toFixed(2) }} (+{{ (((dat.data.val - dat.data.val_old)/dat.data.val_old)*100).toFixed(2) }}%)
               </Badge>
@@ -70,7 +70,7 @@ const props = defineProps({
 
 const strColumbName = ()=>{
   if(props.tableName == 'count') return 'Кол-во';
-  if(props.tableName == 'price') return "Цена";
+  if(props.tableName == 'price' || props.tableName == 'price_liter') return "Цена";
   if(props.tableName == 'price_base') return "Евро";
   if(props.tableName == 'vendor_code') return "Артикул";
   if(props.tableName == 'name') return "Название";
