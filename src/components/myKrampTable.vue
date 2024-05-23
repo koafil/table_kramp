@@ -35,6 +35,7 @@
           <div class="flex align-items-center">
             <LastChangesDate v-model="showDate"/>
             <scan-info />
+            <dialog-config />
           </div>
         </div>
       </template>
@@ -282,6 +283,7 @@ import ScanInfo from "./ScanInfo.vue";
 import LastChangesDate from "./LastChangesDate.vue";
 import LogTable from "./LogTable.vue";
 import LogChart from "./LogChart.vue";
+import DialogConfig from "./dialogConfig.vue";
 
 // const ScanInfo = defineAsyncComponent(() => import("./ScanInfo.vue"))
 
