@@ -75,6 +75,26 @@
           </div>
         </template>
       </Column>
+      <Column body-class="relative " field="price_bir" header="Бирючинский &#8381;" sortable>
+        <template #body="dat">
+          <div
+              @contextmenu.prevent="(e)=>{
+                sLog.tableName='price_bir';
+                sLog.id_kramp=dat.data.id_bir;
+                sLog.showTable = true;
+                sLog.showGraph = false;
+                opLog.toggle(e);
+              }"
+              @click="()=>{opLog.hide();}"
+          >
+            <div class="flex">
+              <div class="z-1 flex-initial w-3rem text-right pr-1">
+                {{ dat.data.price_bir }}
+              </div>
+            </div>
+          </div>
+        </template>
+      </Column>
       <Column body-class="relative " field="price_liter" header="Литер &#8381;" sortable>
         <template #body="dat">
           <div
