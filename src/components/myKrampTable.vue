@@ -46,6 +46,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='vendor_code';
                 sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                 sLog.showTable = true;
                 sLog.showGraph = false;
                 opLog.toggle(e);
@@ -65,6 +66,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='name';
                 sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                 sLog.showTable = true;
                 sLog.showGraph = false;
                 opLog.toggle(e);
@@ -81,6 +83,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='price_bir';
                 sLog.id_kramp=dat.data.id_bir;
+                sLog.name=dat.data.name_bir;
                 sLog.showTable = true;
                 sLog.showGraph = false;
                 opLog.toggle(e);
@@ -101,6 +104,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='price_liter';
                 sLog.id_kramp=dat.data.id_liter;
+                sLog.name=dat.data.name_liter;
                 sLog.showTable = true;
                 sLog.showGraph = false;
                 opLog.toggle(e);
@@ -121,6 +125,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='price';
                 sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                 sLog.showTable = true;
                 sLog.showGraph = true;
                 opLog.toggle(e);
@@ -165,6 +170,7 @@
               @contextmenu.prevent="(e)=>{
                 sLog.tableName='price_base';
                 sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                 sLog.showTable = true;
                 sLog.showGraph = true;
                 opLog.toggle(e);
@@ -202,6 +208,7 @@
                @contextmenu.prevent="(e)=>{
                  sLog.tableName='count';
                  sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                  sLog.showTable = true;
                  sLog.showGraph = true;
                  opLog.toggle(e);
@@ -249,6 +256,7 @@
               @contextmenu.prevent="(e)=>{
                  sLog.tableName='site';
                  sLog.id_kramp=dat.data.id_kramp;
+                sLog.name=dat.data.name;
                  sLog.showTable = true;
                  sLog.showGraph = false;
                  opLog.toggle(e);
@@ -282,6 +290,7 @@
       <TabPanel v-if="sLog.showTable">
         <template #header>
           <i class="pi pi-list"></i>
+          <span v-if="sLog.name" class="ml-2">{{ sLog.name }}</span>
         </template>
         <log-table :table-name="sLog.tableName" :id_kramp="sLog.id_kramp"/>
       </TabPanel>
@@ -328,6 +337,7 @@ import LogChart from "./LogChart.vue";
 const opLog = ref();
 const sLog = ref({
   tableName: '',
+  name: '',
   id_kramp: 0,
   showTable: false,
   showGraph: false
